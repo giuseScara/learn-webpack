@@ -1,11 +1,10 @@
 import css from './app.scss';
+import angular from 'angular';
 
-/*import React from 'react';
-import { render } from 'react-dom';
+class ES6 {
+  constuctor() {
+    console.log("I am Class ES6");
+  }
+}
 
-render.render(
-  "ciao",
-  document.getElementById('root')
-);
-*/
 console.log('Hello from app.js and webpack dev server');

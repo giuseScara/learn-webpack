@@ -9,7 +9,7 @@ var cssDev = ['style-loader', 'css-loader', 'sass-loader'];
 var cssProd = ExtractTextPlugin.extract({ //module to compile e load css and sass
   fallback: 'style-loader',
   loader: ['css-loader', 'sass-loader'],
-  publicPath: './dist'
+  publicPath: './'
 });
 
 var cssConfig = isProduction ? cssProd : cssDev;
@@ -21,26 +21,26 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, './dist'),
-    filename: '[name].bundle.js'
+    filename: '[name].[hash].js'
   },
   module: {
-    rules: [
-      {
-        test: /\.js$/,
+    rules: [{
+        test: /\.js$/, // Check for all js files
         exclude: /node_modules/,
-        loader: "babel-loader"
-        /* options: {
-           "presets": ["es2015", "react"]
-         }*/
+        use: [{
+          loader: 'babel-loader',
+          options: {
+            presets: ['es2015']
+          }
+        }]
       },
       {
         test: /\.scss$/,
         use: cssConfig
       },
       {
-        test: /\.(gif|png|jpe?g|svg)$/i, 
-        use: ['file-loader?name=[name].[ext]&outputPath=images/',
-              'image-webpack-loader']
+        test: /\.(gif|png|jpe?g|svg)$/i,
+        use: ['file-loader?name=[name].[ext]&outputPath=images/'] // 'image-webpack-loader']
       }
     ]
   },
@@ -50,19 +50,19 @@ module.exports = {
     port: 9000,
     stats: "errors-only",
     hot: true,
-    open: true  //reload browser
+    open: true //reload browser
   },
   plugins: [
-    /* new webpack.optimize.CommonsChunkPlugin({
-       name: 'vendor',
-       minChunks: function (module) {
-         // this assumes your vendor imports exist in the node_modules directory
-         return module.context && module.context.indexOf('node_modules') !== -1;
-       }
-     }),
-     new webpack.optimize.CommonsChunkPlugin({
-       name: 'manifest' //But since there are no more common modules between them we end up with just the runtime code included in the manifest file
-     }),*/
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'vendor',
+      minChunks: function (module) {
+        // this assumes your vendor imports exist in the node_modules directory
+        return module.context && module.context.indexOf('node_modules') !== -1;
+      }
+    }),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'manifest' //But since there are no more common modules between them we end up with just the runtime code included in the manifest file
+    }),
     new HtmlWebpackPlugin({ //plugins to add js in index.html
       title: 'Project Demo',
       //minify: {
@@ -87,5 +87,9 @@ module.exports = {
     }),
     new webpack.HotModuleReplacementPlugin(),
     new webpack.NamedModulesPlugin()
-  ]
+  ],
+  stats: {
+    colors: true
+  },
+  devtool: 'source-map'
 }
