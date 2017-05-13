@@ -2,7 +2,7 @@ const webpack = require("webpack");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const path = require('path');
-
+var bootstrapEntryPoints = require("./webpack.bootstrap.config");
 
 var isProduction = process.env.NODE_ENV === 'production';
 var cssDev = ['style-loader', 'css-loader', 'sass-loader'];
@@ -14,9 +14,13 @@ var cssProd = ExtractTextPlugin.extract({ //module to compile e load css and sas
 
 var cssConfig = isProduction ? cssProd : cssDev;
 
+var bootstrapConfig = isProduction ? bootstrapEntryPoints.prod : bootstrapEntryPoints.dev;
+
 module.exports = {
   entry: {
     app: './src/app.js',
+    bootstrap: bootstrapConfig,
+    vendor: ['angular'],
     contact: "./src/contact.js"
   },
   output: {
@@ -40,7 +44,19 @@ module.exports = {
       },
       {
         test: /\.(gif|png|jpe?g|svg)$/i,
-        use: ['file-loader?name=[name].[ext]&outputPath=images/'] // 'image-webpack-loader']
+        use: ['file-loader?name=images/[name].[ext]'] // 'image-webpack-loader']
+      },
+      {
+        test: /\.(woff2?|svg)$/,
+        loader: 'url-loader?limit=10000&name=fonts/[name].[ext]'
+      },
+      {
+        test: /\.(ttf|eot)$/,
+        loader: 'file-loader?name=fonts/[name].[ext]'
+      },
+      {
+        test: /bootstrap-sass[\/\\]assets[\/\\]javascripts[\/\\]/,
+        loader: 'imports-loader?jQuery=jquery'
       }
     ]
   },
@@ -55,10 +71,11 @@ module.exports = {
   plugins: [
     new webpack.optimize.CommonsChunkPlugin({
       name: 'vendor',
-      minChunks: function (module) {
+      /*minChunks: function (module) {
         // this assumes your vendor imports exist in the node_modules directory
         return module.context && module.context.indexOf('node_modules') !== -1;
-      }
+      }*/
+      minChuncks: Infinity
     }),
     new webpack.optimize.CommonsChunkPlugin({
       name: 'manifest' //But since there are no more common modules between them we end up with just the runtime code included in the manifest file
@@ -81,7 +98,7 @@ module.exports = {
       template: './src/contact.html'
     }),
     new ExtractTextPlugin({ //plugins to add app.css in index.html with all style
-      filename: 'app.css',
+      filename: 'css/[name].css',
       disable: !isProduction,
       allChunks: true
     }),
